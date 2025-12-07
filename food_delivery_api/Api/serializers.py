@@ -21,7 +21,7 @@ class MenuItemSerializer(serializers.ModelSerializer):
         fields = '__all__'
     
     def get_price_with_tax(self, obj):
-        return obj.price * 15.80
+        return obj.price * 
 
 
 class OrderItemSerializer(serializers.ModelSerializer):
