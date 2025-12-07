@@ -65,7 +65,8 @@ class RestaurantRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIVi
             {"status": "success", "message": "Restaurant deleted successfully"},
             status=status.HTTP_204_NO_CONTENT
         )
-
+    
+#MenuCategory views
 class MenuCategoryListCreateAPIView(generics.ListCreateAPIView):
     queryset = MenuCategory.objects.all()
     serializer_class = MenuCategorySerializer
@@ -89,6 +90,7 @@ class MenuCategoryListCreateAPIView(generics.ListCreateAPIView):
             status=status.HTTP_400_BAD_REQUEST
         )
 
+#Create a menu item
 class MenuItemListCreateAPIView(generics.ListCreateAPIView):
     queryset = MenuItem.objects.all()
     serializer_class = MenuItemSerializer
@@ -112,16 +114,19 @@ class MenuItemListCreateAPIView(generics.ListCreateAPIView):
             status=status.HTTP_400_BAD_REQUEST
         )
 
+
+#Update or destroy menu items created
 class MenuItemRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = MenuItem.objects.all()
     serializer_class = MenuItemSerializer
 
 
+#Create an order 
 class OrderItemListCreateAPIView(generics.ListCreateAPIView):
     queryset = OrderItem.objects.all()
     serializer_class = OrderItemSerializer
 
-
+#OrderList views
 class OrderListCreateAPIView(generics.ListCreateAPIView):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
@@ -145,6 +150,8 @@ class OrderListCreateAPIView(generics.ListCreateAPIView):
             status=status.HTTP_400_BAD_REQUEST
         )
 
+
+#Update or destroy an order
 class OrderRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
@@ -168,4 +175,7 @@ class OrderRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
             {"status": "error", "errors": serializer.errors},
             status=status.HTTP_400_BAD_REQUEST
         )
+
+
+
 
