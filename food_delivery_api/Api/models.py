@@ -1,13 +1,23 @@
 from django.db import models
-from django.contrib.auth import get_user_model
+from django.contrib.auth.models import AbstractUser
 
 
-# Get the active User model (works for custom user models)
-user = get_user_model()
+class User(AbstractUser):
+    ROLE_CHOICES =(
+        ('admin', 'Admin'),
+        ('restaurant_owner', 'Restaurant Owner'),
+        ('customer', 'Customer')
+    )
+
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='customer')
+
+    def __str__(self):
+        return f'{self.username} ({self.role})'
+
 
 # Restaurant owned by a user
 class Restaurant(models.Model):
-    owner = models.ForeignKey(user, on_delete=models.CASCADE, related_name='restaurant')
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='restaurant')
     name = models.CharField(max_length=250)
     addres = models.TextField()
     phone = models.CharField(max_length=250)
@@ -43,7 +53,7 @@ class Order(models.Model):
         ('DELIVERED','Delivered'),
         ('CANCELLED','Cancelled')
     ]
-    customer = models.ForeignKey(user, on_delete=models.CASCADE, related_name='orders')
+    customer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='orders')
     restaurant = models.ForeignKey(Restaurant, on_delete=models.CASCADE, related_name='orders')
     created_at = models.DateField(auto_now=True)
     total_price = models.DecimalField(max_digits=8, decimal_places=2)

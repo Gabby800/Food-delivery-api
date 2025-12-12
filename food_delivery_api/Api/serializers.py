@@ -1,5 +1,11 @@
 from rest_framework import serializers
-from .models import Restaurant, MenuCategory, MenuItem, Order, OrderItem
+from .models import Restaurant, MenuCategory, MenuItem, Order, OrderItem, User
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["id", "username", "email", "role"]
+
 
 class RestaurantSerializer(serializers.ModelSerializer):
     class Meta:
@@ -13,7 +19,6 @@ class MenuCategorySerializer(serializers.ModelSerializer):
 
 
 class MenuItemSerializer(serializers.ModelSerializer):
-    category = MenuCategorySerializer(read_only=True)
     price_with_tax = serializers.SerializerMethodField()
 
     class Meta:
@@ -21,11 +26,10 @@ class MenuItemSerializer(serializers.ModelSerializer):
         fields = '__all__'
     
     def get_price_with_tax(self, obj):
-        return obj.price * 
-
+        return obj.price * 15.80
 
 class OrderItemSerializer(serializers.ModelSerializer):
-    item = MenuItemSerializer(read_only=True)
+    menu_item = MenuItemSerializer(read_only=True)
 
     class Meta:
         model = OrderItem
@@ -33,8 +37,6 @@ class OrderItemSerializer(serializers.ModelSerializer):
 
 
 class OrderSerializer(serializers.ModelSerializer):
-    items = OrderItemSerializer(many=True, read_only=True)
-
+    order_items = OrderItemSerializer(many=True, read_only=True)
     class Meta:
         model = Order
-        fields = '__all__'

@@ -1,7 +1,6 @@
-from rest_framework import generics, status
+from rest_framework import generics, status, permissions
 from rest_framework.response import Response
-from django.shortcuts import get_object_or_404
-
+from .permissions import IsOwnerOrReadOnly
 from .models import Restaurant, MenuCategory, MenuItem, Order, OrderItem
 from .serializers import (
     RestaurantSerializer,
@@ -15,6 +14,7 @@ from .serializers import (
 class RestaurantListCreateAPIView(generics.ListCreateAPIView):
     queryset = Restaurant.objects.all()
     serializer_class = RestaurantSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -37,6 +37,7 @@ class RestaurantListCreateAPIView(generics.ListCreateAPIView):
 class RestaurantRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Restaurant.objects.all()
     serializer_class = RestaurantSerializer
+    permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -58,7 +59,7 @@ class RestaurantRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIVi
             status=status.HTTP_400_BAD_REQUEST
         )
 
-    def destroy(self, request, *args, **kwargs):
+    def destroy(self, *args, **kwargs):
         instance = self.get_object()
         instance.delete()
         return Response(
@@ -70,6 +71,7 @@ class RestaurantRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIVi
 class MenuCategoryListCreateAPIView(generics.ListCreateAPIView):
     queryset = MenuCategory.objects.all()
     serializer_class = MenuCategorySerializer
+    permission_classes = [permissions.IsAuthenticated]
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -94,6 +96,7 @@ class MenuCategoryListCreateAPIView(generics.ListCreateAPIView):
 class MenuItemListCreateAPIView(generics.ListCreateAPIView):
     queryset = MenuItem.objects.all()
     serializer_class = MenuItemSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -119,17 +122,20 @@ class MenuItemListCreateAPIView(generics.ListCreateAPIView):
 class MenuItemRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = MenuItem.objects.all()
     serializer_class = MenuItemSerializer
+    permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
 
 
 #Create an order 
 class OrderItemListCreateAPIView(generics.ListCreateAPIView):
     queryset = OrderItem.objects.all()
     serializer_class = OrderItemSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
 #OrderList views
 class OrderListCreateAPIView(generics.ListCreateAPIView):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -155,6 +161,7 @@ class OrderListCreateAPIView(generics.ListCreateAPIView):
 class OrderRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
+    permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
