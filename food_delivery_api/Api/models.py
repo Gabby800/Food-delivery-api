@@ -13,13 +13,14 @@ class User(AbstractUser):
 
     def __str__(self):
         return f'{self.username} ({self.role})'
-
+    
+  
 
 # Restaurant owned by a user
 class Restaurant(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='restaurant')
     name = models.CharField(max_length=250)
-    addres = models.TextField()
+    address = models.TextField()
     phone = models.CharField(max_length=250)
     
     def __str__(self):
@@ -30,7 +31,7 @@ class MenuCategory(models.Model):
     restaurant = models.ForeignKey(Restaurant, on_delete=models.CASCADE, related_name='categories')
     name = models.CharField(max_length=250)
 
-    def __str__(self):
+    def __str__(self): 
         return self.name
 
 #Item in a menu category
