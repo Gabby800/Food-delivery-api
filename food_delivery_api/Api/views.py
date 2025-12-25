@@ -3,7 +3,8 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from .permissions import IsAdmin, IsRestaurantOwner, IsCustomer, IsOwnerOrReadOnly
-from rest_framework.authtoken.models import Token
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter, OrderingFilter
 
 from .models import Restaurant, MenuCategory, MenuItem, Order, OrderItem
 from .serializers import (
@@ -66,16 +67,30 @@ class LoginAPIView(generics.GenericAPIView):
 
 # USER LOGOUT
 class LogoutAPIView(generics.GenericAPIView):
-    def post(self, request):
-        user = request.user
-        Token.objects.filter(user=user).delete()
-        return Response({"message": "Logged out successfully"}, status=status.HTTP_200_OK)
+    permission_classes = [IsAuthenticated]
 
+    def post(self, request):
+        try:
+            refresh_token = request.data["refresh"]
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+            return Response({"message": "Logged out successfully"}, status=status.HTTP_200_OK)
+        except Exception:
+            return Response({"error": "Invalid token"}, status=status.HTTP_400_BAD_REQUEST)
+        
 #List & create restaurants
 class RestaurantListCreateAPIView(generics.ListCreateAPIView):
     queryset = Restaurant.objects.all()
     serializer_class = RestaurantSerializer
     permission_classes = [IsAuthenticated, IsRestaurantOwner]
+
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+
+    filterset_fields = ['name']
+
+    search_fields = ["name", "address"]
+    ordering_fields = ["name"]
+    ordering = ["name"]
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -128,7 +143,10 @@ class RestaurantRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIVi
 class MenuCategoryListCreateAPIView(generics.ListCreateAPIView):
     queryset = MenuCategory.objects.all()
     serializer_class = MenuCategorySerializer
-    permission_classes = [IsAdmin, IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsAdmin]
+
+    search_fields = ["name"]
+    ordering_fields = ["name"]
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -153,7 +171,11 @@ class MenuCategoryListCreateAPIView(generics.ListCreateAPIView):
 class MenuItemListCreateAPIView(generics.ListCreateAPIView):
     queryset = MenuItem.objects.all()
     serializer_class = MenuItemSerializer
-    permission_classes = [IsRestaurantOwner, IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsRestaurantOwner]
+
+    search_fields = ["name", "description"]
+    ordering_fields = ["price", "name"]
+    ordering = ["name"]
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -194,8 +216,12 @@ class OrderListCreateAPIView(generics.ListCreateAPIView):
     serializer_class = OrderSerializer
     permission_classes = [IsCustomer]
 
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
+    search_fields = ["status"]
+    ordering_fields = ["created_at", "total_price"]
+    ordering = ["-created_at"]
+
+    def perform_create(self, serializer):
+        serializer.save(customer=self.request.user)
 
         if serializer.is_valid():
             serializer.save(customer=self.request.user)
