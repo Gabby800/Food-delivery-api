@@ -92,6 +92,11 @@ class RestaurantListCreateAPIView(generics.ListCreateAPIView):
     ordering_fields = ["name"]
     ordering = ["name"]
 
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            return [IsAuthenticated(), IsRestaurantOwner()]
+        return [IsAuthenticated()]
+
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -145,8 +150,15 @@ class MenuCategoryListCreateAPIView(generics.ListCreateAPIView):
     serializer_class = MenuCategorySerializer
     permission_classes = [IsAuthenticated, IsAdmin]
 
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+
     search_fields = ["name"]
     ordering_fields = ["name"]
+
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            return [IsAuthenticated(), IsAdmin()]
+        return [IsAuthenticated()]
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -173,9 +185,16 @@ class MenuItemListCreateAPIView(generics.ListCreateAPIView):
     serializer_class = MenuItemSerializer
     permission_classes = [IsAuthenticated, IsRestaurantOwner]
 
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+
     search_fields = ["name", "description"]
     ordering_fields = ["price", "name"]
     ordering = ["name"]
+
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            return [IsAuthenticated(), IsRestaurantOwner()]
+        return [IsAuthenticated()]
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -216,9 +235,16 @@ class OrderListCreateAPIView(generics.ListCreateAPIView):
     serializer_class = OrderSerializer
     permission_classes = [IsCustomer]
 
-    search_fields = ["status"]
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+
+    search_fields = ["order"]
     ordering_fields = ["created_at", "total_price"]
-    ordering = ["-created_at"]
+    ordering = ["created_at"]
+
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            return [IsAuthenticated(), IsCustomer()]
+        return [IsAuthenticated()]
 
     def perform_create(self, serializer):
         serializer.save(customer=self.request.user)
